@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
 import { ApiService } from './api.service';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-root',
@@ -8,10 +10,13 @@ import { ApiService } from './api.service';
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
+
   searchForm: FormGroup;
   displayedColumns: string[] = ['title', 'author', 'count'];
-  dataSource = [];
+  dataSource = new MatTableDataSource();
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
 
   constructor(private fb: FormBuilder, private api: ApiService) { }
 
@@ -21,6 +26,9 @@ export class AppComponent implements OnInit {
       searchText: ['']
     });
   }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator= this.paginator;
+  }
 
   onSearch() {
     console.log(this.searchForm.value.source);
@@ -28,13 +36,13 @@ export class AppComponent implements OnInit {
     let searcText = this.searchForm.value.searchText;
     if (source === "wiki") {
       this.api.getWikiNews(searcText).subscribe(res => {
-        this.dataSource = res;
+        this.dataSource.data = res;
       });
     } else {
-      this.api.getHackerNews(searcText).subscribe(res => {
-        this.dataSource = res['hits'];
-        this.dataSource.forEach((data, index, theArray) => {
-          this.api.getSubMissionCount(data.author).subscribe(res => {
+      this.api.getHackerNews(searcText,this.paginator.pageIndex + 1).subscribe(res => {
+        this.dataSource.data = res['hits'];
+        this.dataSource.data.forEach((ele, index, theArray) => {
+          this.api.getSubMissionCount(ele.author).subscribe(res => {
             theArray[index]['count'] = res['submission_count'];
           });
         });
@@ -43,6 +51,8 @@ export class AppComponent implements OnInit {
 
 
   }
-
+  pageChanged($event) {
+    console.log($event);
+  }
 
 }

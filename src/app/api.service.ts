@@ -24,10 +24,10 @@ export class ApiService {
     return this.http.get<[]>(this.wikiUrl, options);
   }
 
-  getHackerNews(searchText: string): Observable<[]> {
+  getHackerNews(searchText: string, page:string): Observable<[]> {
     // Add safe, URL encoded search parameter if there is a search term
     const options = searchText.trim() ?
-      { params: new HttpParams().set('query', searchText.trim()) } : {};
+      { params: new HttpParams().set('query', searchText.trim()).append('page',page) } : {};
 
     return this.http.get<[]>(this.hackerUrl, options);
   }

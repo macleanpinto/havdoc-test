@@ -26,7 +26,7 @@ import { AppComponent } from './app.component';
     ReactiveFormsModule,
     MatTableModule,
     HttpClientModule,
-    MatPaginatorModule
+    MatPaginatorModule,
   ],
   providers: [ApiService],
   bootstrap: [AppComponent]
